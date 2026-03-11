@@ -34,7 +34,45 @@ sudo apt-get install -y \
 
 ## Dataset
 
-https://huggingface.co/datasets/qiaojunyu/ForceVLA-real-data
+The ForceVLA training dataset is hosted on HuggingFace: [qiaojunyu/ForceVLA-real-data](https://huggingface.co/datasets/qiaojunyu/ForceVLA-real-data)
+
+### Download and Setup
+
+The dataset is managed by [LeRobot](https://github.com/huggingface/lerobot). Set the `HF_LEROBOT_HOME` environment variable to control where the dataset is stored locally. LeRobot will automatically download the data on first use (e.g., when computing normalization statistics or starting training).
+
+```bash
+# Set the local data directory (choose a path with enough disk space)
+export HF_LEROBOT_HOME="$HOME/data/lerobot"
+
+# (Optional) If the HuggingFace dataset is private or you need faster downloads,
+# log in to HuggingFace first:
+# pip install huggingface_hub
+# huggingface-cli login
+```
+
+> **Note:** If `HF_LEROBOT_HOME` is not set, LeRobot defaults to `~/.cache/huggingface/lerobot`.
+
+### Dataset Structure
+
+The ForceVLA dataset uses a 14-dimensional state observation and 7-dimensional actions:
+
+| Field | Shape | Description |
+| --- | --- | --- |
+| `observation.state` | (14,) | EE pose (7) + gripper (1) + force/torque (6) |
+| `observation.image` | (480, 640, 3) | Base (third-person) camera RGB image |
+| `observation.wrist_image` | (480, 640, 3) | Wrist camera RGB image |
+| `action` | (7,) | Δxyz (3) + ΔRPY (3) + gripper (1) |
+
+### Inspecting the Dataset
+
+You can use the provided `load_lerobot_data.py` script to inspect the dataset before training:
+
+```bash
+export HF_LEROBOT_HOME="$HOME/data/lerobot"
+python load_lerobot_data.py
+```
+
+This will print dataset metadata (number of episodes, FPS, camera keys) and load a sample batch to verify shapes.
 
 ## Installation
 
@@ -122,9 +160,36 @@ python scripts/compute_norm_stats.py --config-name forcevla_lora
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 python scripts/train.py forcevla_lora \
     --exp-name=my_experiment \
     --overwrite \
+    --num-train-steps 50000 \
     --batch_size 32 \
     --save_interval 2000 \
     --keep_period 10000
+```
+
+### Training Parameters
+
+The training script uses [tyro](https://brentyi.github.io/tyro/) for CLI configuration. All fields in `TrainConfig` can be overridden from the command line. Key parameters include:
+
+| Parameter | Default (forcevla_lora) | Description |
+| --- | --- | --- |
+| `--num-train-steps` | 50000 | Total number of training steps (batches) to run |
+| `--batch-size` | 4 | Global batch size (must be divisible by the number of GPUs) |
+| `--save-interval` | 5000 | How often (in steps) to save checkpoints |
+| `--keep-period` | 5000 | Checkpoints at steps matching `step % keep_period == 0` are kept permanently |
+| `--log-interval` | 100 | How often (in steps) to log training metrics |
+| `--exp-name` | (required) | Experiment name, used for checkpoint and wandb directories |
+| `--overwrite` | false | Overwrite the checkpoint directory if it already exists |
+| `--resume` | false | Resume training from the last checkpoint |
+| `--seed` | 42 | Random seed for reproducibility |
+| `--fsdp-devices` | 1 | Number of devices to shard the model across with FSDP |
+
+For example, to run a shorter training of 10000 steps:
+
+```bash
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 python scripts/train.py forcevla_lora \
+    --exp-name=my_short_run \
+    --num-train-steps 10000 \
+    --save-interval 1000
 ```
 
 ## Docker Setup
