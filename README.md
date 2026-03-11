@@ -122,9 +122,36 @@ python scripts/compute_norm_stats.py --config-name forcevla_lora
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 python scripts/train.py forcevla_lora \
     --exp-name=my_experiment \
     --overwrite \
+    --num-train-steps 50000 \
     --batch_size 32 \
     --save_interval 2000 \
     --keep_period 10000
+```
+
+### Training Parameters
+
+The training script uses [tyro](https://brentyi.github.io/tyro/) for CLI configuration. All fields in `TrainConfig` can be overridden from the command line. Key parameters include:
+
+| Parameter | Default (forcevla_lora) | Description |
+| --- | --- | --- |
+| `--num-train-steps` | 50000 | Total number of training steps (batches) to run |
+| `--batch-size` | 4 | Global batch size (must be divisible by the number of GPUs) |
+| `--save-interval` | 5000 | How often (in steps) to save checkpoints |
+| `--keep-period` | 5000 | Checkpoints at steps matching `step % keep_period == 0` are kept permanently |
+| `--log-interval` | 100 | How often (in steps) to log training metrics |
+| `--exp-name` | (required) | Experiment name, used for checkpoint and wandb directories |
+| `--overwrite` | false | Overwrite the checkpoint directory if it already exists |
+| `--resume` | false | Resume training from the last checkpoint |
+| `--seed` | 42 | Random seed for reproducibility |
+| `--fsdp-devices` | 1 | Number of devices to shard the model across with FSDP |
+
+For example, to run a shorter training of 10000 steps:
+
+```bash
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 python scripts/train.py forcevla_lora \
+    --exp-name=my_short_run \
+    --num-train-steps 10000 \
+    --save-interval 1000
 ```
 
 ## Docker Setup
