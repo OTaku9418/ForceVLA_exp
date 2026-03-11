@@ -34,7 +34,45 @@ sudo apt-get install -y \
 
 ## Dataset
 
-https://huggingface.co/datasets/qiaojunyu/ForceVLA-real-data
+The ForceVLA training dataset is hosted on HuggingFace: [qiaojunyu/ForceVLA-real-data](https://huggingface.co/datasets/qiaojunyu/ForceVLA-real-data)
+
+### Download and Setup
+
+The dataset is managed by [LeRobot](https://github.com/huggingface/lerobot). Set the `HF_LEROBOT_HOME` environment variable to control where the dataset is stored locally. LeRobot will automatically download the data on first use (e.g., when computing normalization statistics or starting training).
+
+```bash
+# Set the local data directory (choose a path with enough disk space)
+export HF_LEROBOT_HOME="$HOME/data/lerobot"
+
+# (Optional) If the HuggingFace dataset is private or you need faster downloads,
+# log in to HuggingFace first:
+# pip install huggingface_hub
+# huggingface-cli login
+```
+
+> **Note:** If `HF_LEROBOT_HOME` is not set, LeRobot defaults to `~/.cache/huggingface/lerobot`.
+
+### Dataset Structure
+
+The ForceVLA dataset uses a 14-dimensional state observation and 7-dimensional actions:
+
+| Field | Shape | Description |
+| --- | --- | --- |
+| `observation.state` | (14,) | 7 end-effector pose + 1 gripper + 6 force/torque |
+| `observation.image` | (480, 640, 3) | Base (third-person) camera RGB image |
+| `observation.wrist_image` | (480, 640, 3) | Wrist camera RGB image |
+| `action` | (7,) | Δxyz (3) + ΔRPY (3) + gripper (1) |
+
+### Inspecting the Dataset
+
+You can use the provided `load_lerobot_data.py` script to inspect the dataset before training:
+
+```bash
+export HF_LEROBOT_HOME="$HOME/data/lerobot"
+python load_lerobot_data.py
+```
+
+This will print dataset metadata (number of episodes, FPS, camera keys) and load a sample batch to verify shapes.
 
 ## Installation
 
