@@ -12,7 +12,7 @@ from pprint import pprint
 
 import torch
 
-import lerobot
+import lerobot  # noqa: F401 — required for LeRobot dataset registration
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset, LeRobotDatasetMetadata
 
 # ForceVLA training dataset hosted on HuggingFace.

@@ -58,7 +58,7 @@ The ForceVLA dataset uses a 14-dimensional state observation and 7-dimensional a
 
 | Field | Shape | Description |
 | --- | --- | --- |
-| `observation.state` | (14,) | 7 end-effector pose + 1 gripper + 6 force/torque |
+| `observation.state` | (14,) | EE pose (7) + gripper (1) + force/torque (6) |
 | `observation.image` | (480, 640, 3) | Base (third-person) camera RGB image |
 | `observation.wrist_image` | (480, 640, 3) | Wrist camera RGB image |
 | `action` | (7,) | Δxyz (3) + ΔRPY (3) + gripper (1) |
