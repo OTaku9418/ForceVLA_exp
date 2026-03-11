@@ -52,13 +52,13 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 git clone --recurse-submodules https://github.com/OTaku9418/ForceVLA_exp.git
 cd ForceVLA_exp
 
-# 3. Install Python and all dependencies
-uv python install
+# 3. Install Python 3.11 (as required by .python-version) and all dependencies
+uv python install 3.11
 uv sync --all-extras --dev
 
 # 4. Install flaxformer
 cd flaxformer/
-pip install -e .
+uv pip install -e .
 cd ..
 ```
 
@@ -106,10 +106,12 @@ cd ..
 > ```bash
 > git submodule update --init --recursive
 > ```
-> If that doesn't work, clone them manually:
+> If that doesn't work, clone them manually (with the pinned revisions):
 > ```bash
 > git clone https://github.com/huggingface/lerobot.git lerobot/
+> cd lerobot/ && git checkout 0cf864870cf29f4738d3ade893e6fd13fbd7cdb5 && cd ..
 > git clone https://github.com/kvablack/dlimp.git dlimp/
+> cd dlimp/ && git checkout ad72ce3a9b414db2185bc0b38461d4101a65477a && cd ..
 > ```
 
 ## Train Policy
